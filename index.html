@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="description" content="ExMachina · Plataformas web construidas a medida: PM ExMachina, Caliber, VINQ y Amira.">
+<meta property="og:title" content="ExMachina · Plataformas Web">
+<meta property="og:description" content="Si lo puedes imaginar, lo podemos construir. Cuatro plataformas a medida, en producción.">
+<title>ExMachina · Plataformas Web</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8F751'/%3E%3Cpath d='M20 20h24v6H27v6h14v6H27v6h17v6H20z' fill='%230B0C09'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0B0C09;
+  --bg-2: #0E100A;
+  --surface: #12140E;
+  --surface-2: #191C12;
+  --border: rgba(242, 242, 234, 0.08);
+  --border-strong: rgba(242, 242, 234, 0.16);
+  --text: #F2F2EA;
+  --text-mid: #A9AC9D;
+  --text-soft: #6E7263;
+  --accent: #C8F751;
+  --accent-soft: rgba(200, 247, 81, 0.12);
+  --accent-line: rgba(200, 247, 81, 0.28);
+  --accent-ink: #101204;
+  --teal: #2DD4A7;
+  --display: 'Bricolage Grotesque', 'Avenir Next', sans-serif;
+  --body: 'Hanken Grotesk', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --nav-h: 68px;
+}
+
+html { background: var(--bg); color: var(--text); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  background:
+    radial-gradient(1200px 700px at 85% -10%, rgba(200,247,81,0.05), transparent 60%),
+    var(--bg);
+}
+::selection { background: var(--accent); color: var(--accent-ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+a { color: inherit; }
+
+/* ════════ LOADER ════════ */
+.loader {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+  transition: transform 0.7s var(--ease-out), visibility 0s 0.7s;
+}
+.loader-word {
+  font-family: var(--display);
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display: flex;
+  overflow: hidden;
+}
+.loader-word span {
+  display: inline-block;
+  transform: translateY(120%);
+  animation: l-up 0.7s var(--ease-out) forwards;
+  animation-delay: calc(var(--i) * 45ms + 80ms);
+  white-space: pre;
+}
+.loader-word .lx { color: var(--accent); }
+@keyframes l-up { to { transform: translateY(0); } }
+.loader-line { width: 148px; height: 1px; background: var(--border-strong); overflow: hidden; border-radius: 2px; }
+.loader-line::after {
+  content: ''; display: block; height: 100%; width: 100%;
+  background: var(--accent);
+  transform: scaleX(0); transform-origin: left;
+  animation: l-fill 1.05s var(--ease-out) 0.25s forwards;
+}
+@keyframes l-fill { to { transform: scaleX(1); } }
+.loader-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--text-soft); text-transform: uppercase; opacity: 0; animation: l-fade 0.5s ease 0.5s forwards; }
+@keyframes l-fade { to { opacity: 1; } }
+body.is-loaded .loader { transform: translateY(-100%); visibility: hidden; }
+
+/* ════════ PROGRESS + NAV ════════ */
+.progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 60;
+  background: transparent;
+}
+.progress span {
+  display: block; height: 100%; background: var(--accent);
+  transform: scaleX(0); transform-origin: left; will-change: transform;
+}
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(20px, 4vw, 48px);
+  transition: background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
+  border-bottom: 1px solid transparent;
+}
+.nav.scrolled {
+  background: rgba(11, 12, 9, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom-color: var(--border);
+}
+.nav-logo {
+  font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: 0.02em;
+  text-decoration: none; display: flex; align-items: center; gap: 10px;
+  min-height: 44px;
+}
+.nav-logo .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); flex: none; }
+.nav-logo em { font-style: normal; font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: 0.24em; color: var(--text-soft); text-transform: uppercase; margin-top: 3px; }
+.nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
+.nav-links a {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-mid); text-decoration: none;
+  padding: 13px 14px; border-radius: 8px;
+  transition: color 0.2s ease;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); }
+.nav-links a .n { color: var(--text-soft); margin-right: 5px; transition: color 0.2s ease; }
+.nav-links a.active .n { color: var(--accent); }
+.nav-cta {
+  font-family: var(--display); font-size: 13px; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent);
+  text-decoration: none; padding: 12px 20px; border-radius: 100px;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
+  white-space: nowrap;
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(200, 247, 81, 0.25); }
+.nav-cta:active { transform: translateY(0); }
+
+/* ════════ SHELL ════════ */
+.shell { max-width: 1160px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+
+/* ════════ HERO ════════ */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-top: calc(var(--nav-h) + 40px);
+  padding-bottom: 110px;
+  overflow: hidden;
+}
+@media (max-height: 640px) { .scroll-cue { display: none; } .hero { padding-bottom: 40px; } }
+.hero-bg { position: absolute; inset: 0; pointer-events: none; }
+.hero-grid {
+  position: absolute; inset: -10%;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 76px 76px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+  will-change: transform;
+}
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); will-change: transform; }
+.orb-a { width: 44vw; height: 44vw; max-width: 620px; max-height: 620px; right: -12%; top: -14%; background: radial-gradient(circle, rgba(200,247,81,0.17), transparent 65%); }
+.orb-b { width: 36vw; height: 36vw; max-width: 500px; max-height: 500px; left: -14%; bottom: -18%; background: radial-gradient(circle, rgba(45,212,167,0.12), transparent 65%); }
+.ring {
+  position: absolute; right: -6%; top: 50%;
+  width: clamp(340px, 42vw, 620px); height: clamp(340px, 42vw, 620px);
+  margin-top: calc(clamp(340px, 42vw, 620px) / -2);
+  border: 1px dashed var(--accent-line);
+  border-radius: 50%;
+  animation: spin 70s linear infinite;
+  opacity: 0.55;
+}
+.ring::after {
+  content: ''; position: absolute; top: -4px; left: 50%; margin-left: -4px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 18px rgba(200,247,81,0.8);
+}
+.ring-inner {
+  position: absolute; inset: 18%;
+  border: 1px dashed rgba(242,242,234,0.12);
+  border-radius: 50%;
+  animation: spin 100s linear infinite reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.hero-inner { position: relative; z-index: 2; }
+.kicker {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 30px;
+}
+.kicker::before { content: ''; width: 34px; height: 1px; background: var(--accent-line); }
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(42px, 7.4vw, 88px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  max-width: 880px;
+  margin-bottom: 34px;
+}
+.hero h1 .row { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.hero h1 .row > span { display: inline-block; transform: translateY(115%); transition: transform 0.9s var(--ease-out); }
+body.is-loaded .hero h1 .row > span { transform: translateY(0); }
+.hero h1 .row:nth-child(2) > span { transition-delay: 0.09s; }
+.hero h1 em { font-style: italic; color: var(--accent); font-weight: 600; }
+.hero-sub {
+  font-size: clamp(16px, 1.6vw, 18px);
+  color: var(--text-mid);
+  line-height: 1.7;
+  max-width: 540px;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.8s ease 0.35s, transform 0.8s var(--ease-out) 0.35s;
+}
+body.is-loaded .hero-sub { opacity: 1; transform: none; }
+
+.hero-stats {
+  display: flex; flex-wrap: wrap;
+  margin-top: clamp(48px, 7vh, 84px);
+  border-top: 1px solid var(--border);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.8s ease 0.55s, transform 0.8s var(--ease-out) 0.55s;
+}
+body.is-loaded .hero-stats { opacity: 1; transform: none; }
+.stat { flex: 1 1 180px; padding: 26px 28px 30px 0; }
+.stat + .stat { border-left: 1px solid var(--border); padding-left: 28px; }
+.stat-num {
+  font-family: var(--display); font-size: clamp(32px, 3.6vw, 46px); font-weight: 700;
+  color: var(--text); letter-spacing: -0.02em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.stat-num i { font-style: normal; color: var(--accent); }
+.stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-soft); margin-top: 10px; }
+
+.scroll-cue {
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--text-soft);
+  z-index: 2;
+  opacity: 0; transition: opacity 0.8s ease 1s;
+}
+body.is-loaded .scroll-cue { opacity: 1; }
+.scroll-cue::after {
+  content: ''; width: 1px; height: 42px;
+  background: linear-gradient(var(--accent), transparent);
+  animation: cue 2s var(--ease-out) infinite;
+}
+@keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 45% { transform: scaleY(1); transform-origin: top; } 55% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* ════════ REVEAL (scroll) ════════ */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.75s ease, transform 0.75s var(--ease-out); transition-delay: var(--d, 0s); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ════════ ÍNDICE ════════ */
+.toc { padding: clamp(70px, 11vh, 120px) 0 clamp(30px, 5vh, 60px); }
+.toc-list { list-style: none; border-top: 1px solid var(--border); margin-top: 26px; }
+.toc-item { border-bottom: 1px solid var(--border); }
+.toc-item a {
+  display: grid;
+  grid-template-columns: 64px 1fr auto auto;
+  align-items: center; gap: 20px;
+  padding: 26px 8px;
+  text-decoration: none;
+  position: relative;
+  transition: background 0.3s ease;
+}
+.toc-item a:hover { background: var(--surface); }
+.toc-num { font-family: var(--mono); font-size: 12px; color: var(--text-soft); transition: color 0.3s ease; }
+.toc-item a:hover .toc-num { color: var(--accent); }
+.toc-name {
+  font-family: var(--display); font-size: clamp(21px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em;
+  transition: transform 0.35s var(--ease-out);
+}
+.toc-item a:hover .toc-name { transform: translateX(10px); }
+.toc-ind { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
+.toc-arrow { color: var(--text-soft); transition: color 0.3s ease, transform 0.35s var(--ease-out); font-size: 18px; }
+.toc-item a:hover .toc-arrow { color: var(--accent); transform: translate(4px, -4px); }
+
+/* ════════ PLATFORM ════════ */
+.platform { position: relative; padding: clamp(90px, 14vh, 150px) 0; }
+.platform + .platform { border-top: 1px solid var(--border); }
+.platform { scroll-margin-top: calc(var(--nav-h) - 20px); }
+
+.ghost-wrap { position: absolute; right: 0; top: clamp(20px, 4vh, 50px); pointer-events: none; overflow: visible; will-change: transform; }
+.ghost {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(150px, 22vw, 320px); line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200, 247, 81, 0.10);
+  user-select: none;
+}
+.platform:nth-of-type(even) .ghost { -webkit-text-stroke-color: rgba(45, 212, 167, 0.10); }
+
+.platform-inner { position: relative; z-index: 2; }
+.platform-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+.platform-title-group { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.platform-name {
+  font-family: var(--display);
+  font-size: clamp(34px, 4.6vw, 54px);
+  font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+}
+.industry-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  padding: 6px 14px; border-radius: 100px; white-space: nowrap;
+}
+.platform-link {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-mid); text-decoration: none;
+  border: 1px solid var(--border-strong);
+  padding: 13px 20px; border-radius: 100px;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  white-space: nowrap;
+}
+.platform-link svg { width: 12px; height: 12px; transition: transform 0.3s var(--ease-out); }
+.platform-link:hover { color: var(--accent-ink); border-color: var(--accent); background: var(--accent); }
+.platform-link:hover svg { transform: translate(2px, -2px); }
+
+.platform-overview {
+  font-size: clamp(16px, 1.5vw, 18px);
+  color: var(--text-mid); line-height: 1.7;
+  max-width: 66ch;
+  margin-bottom: 52px;
+}
+.platform-overview strong { color: var(--text); font-weight: 500; }
+
+.features-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-soft);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.features-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.features-label i { font-style: normal; color: var(--accent); }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.feature {
+  background: var(--surface);
+  padding: 26px 28px 28px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+.feature::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--accent);
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform 0.35s var(--ease-out);
+}
+.feature:hover { background: var(--surface-2); }
+.feature:hover::before { transform: scaleY(1); }
+.feature-idx { font-family: var(--mono); font-size: 10px; color: var(--text-soft); letter-spacing: 0.14em; margin-bottom: 14px; transition: color 0.3s ease; }
+.feature:hover .feature-idx { color: var(--accent); }
+.feature-name { font-family: var(--display); font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.005em; }
+.feature-desc { font-size: 13.5px; color: var(--text-mid); line-height: 1.65; }
+
+/* ════════ MARQUEE ════════ */
+.marquee {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  padding: 22px 0;
+  display: flex;
+  user-select: none;
+}
+.marquee-track {
+  display: flex; flex: none; align-items: center; gap: 56px;
+  padding-right: 56px;
+  animation: marquee 26s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-track span {
+  font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-soft); white-space: nowrap;
+  display: flex; align-items: center; gap: 56px;
+}
+.marquee-track span::after { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.6; }
+@keyframes marquee { to { transform: translateX(-100%); } }
+
+/* ════════ FOOTER ════════ */
+.footer { padding: clamp(90px, 14vh, 160px) 0 44px; position: relative; overflow: hidden; }
+.footer-glow {
+  position: absolute; left: 50%; bottom: -30%; transform: translateX(-50%);
+  width: 80vw; height: 50vh; max-width: 900px;
+  background: radial-gradient(ellipse, rgba(200,247,81,0.08), transparent 65%);
+  pointer-events: none; filter: blur(40px);
+}
+.footer-inner { position: relative; z-index: 2; }
+.footer h2 {
+  font-family: var(--display);
+  font-size: clamp(40px, 6.4vw, 76px);
+  font-weight: 700; letter-spacing: -0.025em; line-height: 1.04;
+  max-width: 700px;
+  margin-bottom: 22px;
+}
+.footer h2 em { font-style: italic; color: var(--accent); font-weight: 600; }
+.footer-sub { font-size: 17px; color: var(--text-mid); max-width: 480px; line-height: 1.7; margin-bottom: 44px; }
+.footer-cta {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--display); font-size: 16px; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent);
+  padding: 18px 34px; border-radius: 100px; text-decoration: none;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+}
+.footer-cta svg { width: 15px; height: 15px; transition: transform 0.3s var(--ease-out); }
+.footer-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(200, 247, 81, 0.3); }
+.footer-cta:hover svg { transform: translateX(4px); }
+.footer-meta {
+  margin-top: clamp(64px, 10vh, 110px);
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft);
+}
+.footer-meta a { color: var(--text-soft); text-decoration: none; transition: color 0.2s ease; padding: 12px 0; display: inline-block; }
+.footer-meta a:hover { color: var(--accent); }
+.footer-meta .fm-links { display: flex; gap: 28px; flex-wrap: wrap; }
+
+/* ════════ RESPONSIVE ════════ */
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .toc-item a { grid-template-columns: 40px 1fr auto; }
+  .toc-ind { display: none; }
+  .ring { right: -40%; opacity: 0.35; }
+  .stat { flex-basis: 140px; padding-right: 18px; }
+  .stat + .stat { padding-left: 18px; }
+}
+@media (max-width: 520px) {
+  .hero { padding-top: calc(var(--nav-h) + 16px); }
+  .hero-stats .stat:nth-child(3) { border-left: none; padding-left: 0; border-top: 1px solid var(--border); flex-basis: 100%; }
+  .scroll-cue { display: none; }
+  .platform-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ════════ REDUCED MOTION ════════ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .loader { display: none; }
+  body:not(.is-loaded) .hero h1 .row > span,
+  body:not(.is-loaded) .hero-sub,
+  body:not(.is-loaded) .hero-stats,
+  body:not(.is-loaded) .scroll-cue { transform: none; opacity: 1; }
+  .hero h1 .row > span { transform: none; }
+  .hero-sub, .hero-stats, .scroll-cue { opacity: 1; transform: none; transition: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .ring, .ring-inner, .marquee-track, .scroll-cue::after { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div class="loader" aria-hidden="true">
+  <div class="loader-word">
+    <span style="--i:0" class="lx">E</span><span style="--i:1" class="lx">X</span><span style="--i:2"> </span><span style="--i:3">M</span><span style="--i:4">A</span><span style="--i:5">C</span><span style="--i:6">H</span><span style="--i:7">I</span><span style="--i:8">N</span><span style="--i:9">A</span>
+  </div>
+  <div class="loader-line"></div>
+  <div class="loader-tag">Plataformas Web</div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- NAV -->
+<nav class="nav" id="nav" aria-label="Navegación principal">
+  <a class="nav-logo" href="#top">
+    <span class="dot"></span>
+    ExMachina <em>Plataformas</em>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#pm" data-sec="pm"><span class="n">01</span>PM</a></li>
+    <li><a href="#caliber" data-sec="caliber"><span class="n">02</span>Caliber</a></li>
+    <li><a href="#vinq" data-sec="vinq"><span class="n">03</span>VINQ</a></li>
+    <li><a href="#amira" data-sec="amira"><span class="n">04</span>Amira</a></li>
+  </ul>
+  <a class="nav-cta" href="mailto:exmachina.contacto@gmail.com">Hablemos</a>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-grid" data-mouse="6"></div>
+    <div class="orb orb-a" data-mouse="22"></div>
+    <div class="orb orb-b" data-mouse="-16"></div>
+    <div class="ring" data-mouse="10"><div class="ring-inner"></div></div>
+  </div>
+  <div class="shell hero-inner">
+    <div class="kicker">ExMachina — Plataformas Web</div>
+    <h1>
+      <span class="row"><span>Si lo puedes imaginar,</span></span>
+      <span class="row"><span>lo podemos <em>construir.</em></span></span>
+    </h1>
+    <p class="hero-sub">Cada plataforma aquí fue construida a medida para un cliente real, resolviendo un problema real. Lo que ves es lo que es posible — y esto es solo el inicio.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num"><span data-count="4">0</span><i>&thinsp;</i></div>
+        <div class="stat-label">Plataformas construidas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span data-count="27">0</span><i>+</i></div>
+        <div class="stat-label">Features en producción</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span data-count="100">0</span><i>%</i></div>
+        <div class="stat-label">Diseño y código a medida</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true">Scroll</div>
+</header>
+
+<main>
+
+<!-- ÍNDICE -->
+<section class="toc shell" aria-label="Índice de plataformas">
+  <div class="kicker reveal">Índice</div>
+  <ul class="toc-list">
+    <li class="toc-item reveal" style="--d:0.05s"><a href="#pm">
+      <span class="toc-num">01</span>
+      <span class="toc-name">PM ExMachina</span>
+      <span class="toc-ind">Project Management</span>
+      <span class="toc-arrow" aria-hidden="true">↗</span>
+    </a></li>
+    <li class="toc-item reveal" style="--d:0.12s"><a href="#caliber">
+      <span class="toc-num">02</span>
+      <span class="toc-name">Caliber</span>
+      <span class="toc-ind">Leads &amp; Campañas</span>
+      <span class="toc-arrow" aria-hidden="true">↗</span>
+    </a></li>
+    <li class="toc-item reveal" style="--d:0.19s"><a href="#vinq">
+      <span class="toc-num">03</span>
+      <span class="toc-name">VINQ</span>
+      <span class="toc-ind">Gestión Inmobiliaria</span>
+      <span class="toc-arrow" aria-hidden="true">↗</span>
+    </a></li>
+    <li class="toc-item reveal" style="--d:0.26s"><a href="#amira">
+      <span class="toc-num">04</span>
+      <span class="toc-name">Amira</span>
+      <span class="toc-ind">Consultorios · CM</span>
+      <span class="toc-arrow" aria-hidden="true">↗</span>
+    </a></li>
+  </ul>
+</section>
+
+<!-- ── 01 · PM EXMACHINA ── -->
+<section class="platform" id="pm">
+  <div class="ghost-wrap" data-prlx="90"><div class="ghost" aria-hidden="true">01</div></div>
+  <div class="shell platform-inner">
+    <div class="kicker reveal">01 — Plataforma</div>
+    <div class="platform-header">
+      <div class="platform-title-group reveal" style="--d:0.06s">
+        <h2 class="platform-name">PM ExMachina</h2>
+        <span class="industry-badge">Project Management</span>
+      </div>
+      <a href="https://pm.exmachina.work/" target="_blank" rel="noopener" class="platform-link reveal" style="--d:0.12s">
+        Ver plataforma
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H6M11.5 2.5V8"/></svg>
+      </a>
+    </div>
+    <p class="platform-overview reveal" style="--d:0.1s">Centro de operación de proyectos para agencias: <strong>un solo lugar</strong> donde ver el estado de cada cliente, cada tarea y cada fecha límite, sin depender de hojas de cálculo ni conversaciones dispersas.</p>
+
+    <div class="features-label reveal">Features <i>/ 08</i></div>
+    <div class="features-grid">
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·01</div>
+        <div class="feature-name">Roadmap en tiempo real</div>
+        <div class="feature-desc">Vista general del negocio: tareas próximas con fecha límite y proyecto asignado, pendientes por miembro del equipo y resumen de avance global — todo desde la pantalla de inicio.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·02</div>
+        <div class="feature-name">Proyectos activos</div>
+        <div class="feature-desc">Tablero con tarjetas por cliente que muestra tipo de servicio, status actual, notas de progreso y porcentaje de avance. El estado completo de la operación de un vistazo.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·03</div>
+        <div class="feature-name">Pipeline de etapas por proyecto</div>
+        <div class="feature-desc">Cada proyecto tiene su propio flujo de etapas con status (Completo / En curso / Pendiente), fecha asignada y campo de notas o URL, para rastrear exactamente en qué punto está cada entregable.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·04</div>
+        <div class="feature-name">Tareas adicionales por proyecto</div>
+        <div class="feature-desc">Además del pipeline formal, cada proyecto puede tener tareas extra para pendientes puntuales, ajustes o seguimientos — sin romper el flujo del cronograma principal.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·05</div>
+        <div class="feature-name">Tareas independientes</div>
+        <div class="feature-desc">Pendientes internos del equipo que no pertenecen a ningún proyecto de cliente — capturados en el mismo sistema, sin perderlos entre conversaciones.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·06</div>
+        <div class="feature-name">Calendario unificado</div>
+        <div class="feature-desc">Vista mensual con todas las tareas y entregables de todos los proyectos en una sola agenda, con código de color por cliente. Colisiones de fechas y carga de trabajo visibles de inmediato.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·07</div>
+        <div class="feature-name">Archivado e historial</div>
+        <div class="feature-desc">Registro de proyectos cerrados con status final, etapas completadas y fecha de cierre — para referencia, seguimiento post-entrega y consulta futura.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·08</div>
+        <div class="feature-name">Sincronización en tiempo real</div>
+        <div class="feature-desc">Los datos siempre están actualizados sin necesidad de refrescar ni guardar manualmente. Lo que ves es lo que está pasando.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 02 · CALIBER ── -->
+<section class="platform" id="caliber">
+  <div class="ghost-wrap" data-prlx="90"><div class="ghost" aria-hidden="true">02</div></div>
+  <div class="shell platform-inner">
+    <div class="kicker reveal">02 — Plataforma</div>
+    <div class="platform-header">
+      <div class="platform-title-group reveal" style="--d:0.06s">
+        <h2 class="platform-name">Caliber</h2>
+        <span class="industry-badge">Gestión de Leads &amp; Campañas</span>
+      </div>
+      <a href="https://alancruzcreai.github.io/caliber/" target="_blank" rel="noopener" class="platform-link reveal" style="--d:0.12s">
+        Ver plataforma
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H6M11.5 2.5V8"/></svg>
+      </a>
+    </div>
+    <p class="platform-overview reveal" style="--d:0.1s">Dashboard de inteligencia de campañas y gestión de leads <strong>conectado en tiempo real a Meta Ads</strong>. Muestra exactamente a dónde va el presupuesto publicitario, qué produce en cada paso del funnel y sugiere — vía IA — el mensaje exacto para cerrar cada conversación.</p>
+
+    <div class="features-label reveal">Features <i>/ 05</i></div>
+    <div class="features-grid">
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·01</div>
+        <div class="feature-name">Live Overview</div>
+        <div class="feature-desc">Panel de entrada conectado directamente a la cuenta de Meta Ads. Todo lo que se ve es data real — ningún número es estimado ni simulado.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·02</div>
+        <div class="feature-name">Ads Performance</div>
+        <div class="feature-desc">El recorrido completo de cada peso invertido: embudo de costos de impresión a cliente cerrado, gasto por plataforma, desglose por campaña y anuncio, CTR, CPL y recomendaciones de IA. Se sincroniza en vivo con Meta — si se pausa una campaña, se refleja aquí de inmediato.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·03</div>
+        <div class="feature-name">Targeting &amp; Audiences</div>
+        <div class="feature-desc">Visualización de a quién están llegando realmente los anuncios: rendimiento por edad, plataforma, país y género, con CTR en vivo. Incluye sección para construir audiencias de retargeting y lookalike.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·04</div>
+        <div class="feature-name">Math Console</div>
+        <div class="feature-desc">Calculadora de decisiones que parte del CPC real de la campaña. Se mueven los parámetros — presupuesto, tasa de cierre, ticket — y muestra clientes proyectados, costo por cliente y punto de equilibrio. El CPC se actualiza solo cada 6 horas.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·05</div>
+        <div class="feature-name">Ad Conversations — Agente IA</div>
+        <div class="feature-desc">Inbox con los chats de WhatsApp que llegan por los anuncios activos. El agente de IA lee cada conversación y redacta el siguiente mensaje de cierre — tú decides si enviarlo. Ya construido y activo en modo demo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 03 · VINQ ── -->
+<section class="platform" id="vinq">
+  <div class="ghost-wrap" data-prlx="90"><div class="ghost" aria-hidden="true">03</div></div>
+  <div class="shell platform-inner">
+    <div class="kicker reveal">03 — Plataforma</div>
+    <div class="platform-header">
+      <div class="platform-title-group reveal" style="--d:0.06s">
+        <h2 class="platform-name">VINQ</h2>
+        <span class="industry-badge">Gestión Inmobiliaria</span>
+      </div>
+      <a href="https://vinq-demo.pages.dev/" target="_blank" rel="noopener" class="platform-link reveal" style="--d:0.12s">
+        Ver plataforma
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H6M11.5 2.5V8"/></svg>
+      </a>
+    </div>
+    <p class="platform-overview reveal" style="--d:0.1s">Plataforma de <strong>control total para desarrollos inmobiliarios</strong>: centraliza captación de leads, presentación del proyecto, esquemas de pago, documentos legales y administración de rentas en un solo workspace. Diseñada para escalar — un mismo sistema puede alojar múltiples desarrollos.</p>
+
+    <div class="features-label reveal">Features <i>/ 08</i></div>
+    <div class="features-grid">
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·01</div>
+        <div class="feature-name">Control Tower</div>
+        <div class="feature-desc">Panel central con estado del desarrollo activo: prototipos disponibles, documentos legales cargados, descuento máximo por fase, datos del predio y acceso a todos los módulos desde un solo punto.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·02</div>
+        <div class="feature-name">Tour Virtual</div>
+        <div class="feature-desc">Catálogo interactivo con galería de renders y fotos por prototipo, amenidades, fichas técnicas en PDF y recorrido fotográfico. El prospecto explora el proyecto completo desde cualquier dispositivo, sin cita presencial.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·03</div>
+        <div class="feature-name">Pagos &amp; Inversión</div>
+        <div class="feature-desc">Disponibilidad de unidades en tiempo real con modelo, vista, m², precio de lista y fecha de entrega. Esquemas de pago por fase con descuentos, proyección de ROI por prototipo y datos bancarios oficiales para iniciar el apartado.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·04</div>
+        <div class="feature-name">Legal &amp; Contabilidad</div>
+        <div class="feature-desc">Repositorio de contratos con firma digital y control de status (borrador / en revisión / firmado). Expediente del proyecto con documentos descargables y facturación CFDI por operación.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·05</div>
+        <div class="feature-name">Leads &amp; Conversaciones</div>
+        <div class="feature-desc">Bandeja unificada que centraliza mensajes de WhatsApp, Instagram y Facebook en un solo lugar, con copiloto de IA para atención y seguimiento de cada prospecto.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·06</div>
+        <div class="feature-name">CRM &amp; Pipeline</div>
+        <div class="feature-desc">Base de leads con calificación, intención, propiedad de interés, valor y etapa en el proceso de compra. Incluye vista Kanban y secuencias de remarketing para retomar prospectos que no han cerrado.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·07</div>
+        <div class="feature-name">Administración</div>
+        <div class="feature-desc">Módulo de operación para rentas: calendario multi-canal de reservas, gestión de operación y finanzas, sincronizado con Airbnb y Booking.com, con opción de conectar Vrbo.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·08</div>
+        <div class="feature-name">Integraciones</div>
+        <div class="feature-desc">Panel de conexiones para WhatsApp Business API, Meta/Facebook, Instagram DM, Telegram, pasarelas de pago y configuración de marca, divisa y equipo. 9 integraciones activas en producción.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 04 · AMIRA ── -->
+<section class="platform" id="amira">
+  <div class="ghost-wrap" data-prlx="90"><div class="ghost" aria-hidden="true">04</div></div>
+  <div class="shell platform-inner">
+    <div class="kicker reveal">04 — Plataforma</div>
+    <div class="platform-header">
+      <div class="platform-title-group reveal" style="--d:0.06s">
+        <h2 class="platform-name">Amira</h2>
+        <span class="industry-badge">Consultorios · Community Management</span>
+      </div>
+      <a href="https://alancruzcreai.github.io/amira-demo/" target="_blank" rel="noopener" class="platform-link reveal" style="--d:0.12s">
+        Ver plataforma
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H6M11.5 2.5V8"/></svg>
+      </a>
+    </div>
+    <p class="platform-overview reveal" style="--d:0.1s">Copiloto de contenido, conversaciones y diseño para consultorios médicos. Amira investiga, redacta y propone en la voz del doctor — con fuentes citadas y verificación de compliance — pero <strong>nada llega a un paciente ni se publica sin que el médico lo apruebe</strong>. El consultorio crece en redes y reduce inasistencias sin que el doctor tenga que sentarse a redactar ni a diseñar.</p>
+
+    <div class="features-label reveal">Features <i>/ 06</i></div>
+    <div class="features-grid">
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·01</div>
+        <div class="feature-name">Inicio — Panel de copiloto</div>
+        <div class="feature-desc">Vista de entrada que resume lo que necesita atención: propuestas de contenido listas para revisar, conversaciones escaladas al doctor y artes pendientes de visto bueno. Incluye chat directo con Amira para pedir sugerencias de temas, ver quién espera respuesta o elegir plantillas.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·02</div>
+        <div class="feature-name">Contenido</div>
+        <div class="feature-desc">Amira investiga con fuentes citadas, identifica los temas que mejor funcionan para el perfil del doctor y redacta propuestas completas en su voz: hook, desarrollo por puntos, llamado a la acción y verificación de compliance COFEPRIS. El doctor aprueba, edita o rechaza con un clic. Nada se publica sin su visto bueno.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.14s">
+        <div class="feature-idx">F·03</div>
+        <div class="feature-name">Conversaciones</div>
+        <div class="feature-desc">Bandeja unificada de WhatsApp e Instagram con resumen automático de cada conversación, semáforo de urgencia y etiqueta de intención (quiere agendar, tiene una duda, posible urgencia). Amira sugiere el siguiente paso y escala al doctor los casos que requieren criterio clínico. Speed-to-lead de 8 minutos.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.2s">
+        <div class="feature-idx">F·04</div>
+        <div class="feature-name">Estudio de diseño</div>
+        <div class="feature-desc">Plantillas con la marca del consultorio ya inyectada. Amira genera variantes del arte, las evalúa con checks deterministas (contraste WCAG, texto en zona segura, dentro de paleta, legibilidad) y recomienda la mejor con un score. El doctor elige y aprueba — sin depender de un diseñador para el día a día.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.02s">
+        <div class="feature-idx">F·05</div>
+        <div class="feature-name">Calendario</div>
+        <div class="feature-desc">Vista semanal de publicaciones programadas con mezcla de contenido sugerida (60% educación, 25% prueba social, 15% conversión) y cadencia de recordatorios de cita 3-1-0 para reducir inasistencias. Muestra el status de aprobación de cada post y las citas próximas con su recordatorio correspondiente.</div>
+      </div>
+      <div class="feature reveal" style="--d:0.08s">
+        <div class="feature-idx">F·06</div>
+        <div class="feature-name">Dos roles: Doctor y Secretaria</div>
+        <div class="feature-desc">La plataforma tiene vista diferenciada por rol. El doctor ve aprobaciones pendientes, escalamientos y decisiones. La secretaria opera el día a día: conversaciones, agenda y seguimiento. Cada quien ve lo que le corresponde.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Diseño</span><span>Ingeniería</span><span>Inteligencia Artificial</span><span>A la medida</span>
+  </div>
+  <div class="marquee-track" aria-hidden="true">
+    <span>Diseño</span><span>Ingeniería</span><span>Inteligencia Artificial</span><span>A la medida</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="shell footer-inner">
+    <div class="kicker reveal">Contacto</div>
+    <h2 class="reveal" style="--d:0.06s">¿Tienes una idea?<br>Hagámosla <em>real.</em></h2>
+    <p class="footer-sub reveal" style="--d:0.12s">Cuéntanos qué problema quieres resolver y te mostramos cómo se vería tu plataforma. Sin compromiso.</p>
+    <a href="mailto:exmachina.contacto@gmail.com" class="footer-cta reveal" style="--d:0.18s">
+      Hablemos de tu proyecto
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M1 7h12M8 2l5 5-5 5"/></svg>
+    </a>
+    <div class="footer-meta">
+      <span>© 2026 ExMachina — Consultora digital · Tuxtla Gutiérrez, MX</span>
+      <span class="fm-links">
+        <a href="mailto:exmachina.contacto@gmail.com">exmachina.contacto@gmail.com</a>
+        <a href="https://www.instagram.com/mexmachina" target="_blank" rel="noopener">@mexmachina</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── Loader → is-loaded ── */
+  function ready() {
+    document.body.classList.add('is-loaded');
+    countUp();
+  }
+  if (reduce) {
+    ready();
+  } else {
+    window.addEventListener('load', function () { setTimeout(ready, 1350); });
+    setTimeout(ready, 3200); /* fallback si load tarda */
+  }
+
+  /* ── Count-up stats ── */
+  var counted = false;
+  function countUp() {
+    if (counted) return;
+    counted = true;
+    document.querySelectorAll('[data-count]').forEach(function (el) {
+      var target = parseInt(el.dataset.count, 10);
+      if (reduce) { el.textContent = target; return; }
+      var t0 = performance.now(), dur = 1300;
+      function tick(now) {
+        var p = Math.min((now - t0) / dur, 1);
+        var e = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * e);
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  /* ── Scroll reveals ── */
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ── Nav: fondo al scrollear + link activo ── */
+  var nav = document.getElementById('nav');
+  var navLinks = document.querySelectorAll('.nav-links a[data-sec]');
+  var secIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) {
+        navLinks.forEach(function (a) {
+          a.classList.toggle('active', a.dataset.sec === en.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-35% 0px -55% 0px' });
+  document.querySelectorAll('.platform[id]').forEach(function (s) { secIO.observe(s); });
+
+  /* ── rAF loop: progress bar + parallax scroll + parallax mouse ── */
+  var bar = document.getElementById('progressBar');
+  var prlx = [];
+  document.querySelectorAll('[data-prlx]').forEach(function (el) {
+    prlx.push({ el: el, amt: parseFloat(el.dataset.prlx) });
+  });
+  var mouseEls = [];
+  document.querySelectorAll('[data-mouse]').forEach(function (el) {
+    mouseEls.push({ el: el, f: parseFloat(el.dataset.mouse) });
+  });
+
+  var mx = 0, my = 0, cmx = 0, cmy = 0;
+  var finePointer = window.matchMedia('(pointer: fine)').matches;
+  if (finePointer && !reduce) {
+    window.addEventListener('pointermove', function (e) {
+      mx = (e.clientX / window.innerWidth) - 0.5;
+      my = (e.clientY / window.innerHeight) - 0.5;
+    }, { passive: true });
+  }
+
+  function frame() {
+    var vh = window.innerHeight;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - vh;
+    bar.style.transform = 'scaleX(' + (max > 0 ? (window.scrollY / max) : 0) + ')';
+
+    if (!reduce) {
+      /* lectura por lote */
+      var reads = [];
+      for (var i = 0; i < prlx.length; i++) {
+        var r = prlx[i].el.parentElement.getBoundingClientRect();
+        reads.push((r.top + r.height / 2 - vh / 2) / vh);
+      }
+      /* escritura por lote */
+      for (var j = 0; j < prlx.length; j++) {
+        prlx[j].el.style.transform = 'translate3d(0,' + (reads[j] * prlx[j].amt).toFixed(2) + 'px,0)';
+      }
+      cmx += (mx - cmx) * 0.06;
+      cmy += (my - cmy) * 0.06;
+      for (var k = 0; k < mouseEls.length; k++) {
+        var f = mouseEls[k].f;
+        mouseEls[k].el.style.transform = 'translate3d(' + (cmx * f).toFixed(2) + 'px,' + (cmy * f).toFixed(2) + 'px,0)';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
