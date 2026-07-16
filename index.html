@@ -12,6 +12,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<noscript><style>
+.loader { display: none !important; }
+.reveal, .hero-sub, .hero-stats, .scroll-cue { opacity: 1 !important; transform: none !important; }
+.hero h1 .row > span { transform: none !important; }
+.nav { transform: none !important; opacity: 1 !important; background: rgba(16,3,3,0.85) !important; }
+</style></noscript>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -58,13 +64,16 @@ a { color: inherit; }
 
 /* ════════ LOADER ════════ */
 .loader {
-  position: fixed; inset: 0; z-index: 100;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 100;
   background: var(--bg);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
   transition: transform 0.7s var(--ease-out), visibility 0s 0.7s;
+  /* failsafe: se oculta solo aunque el JS nunca corra */
+  animation: l-bye 0.6s ease 4.2s forwards;
 }
+@keyframes l-bye { to { transform: translateY(-100%); visibility: hidden; } }
 .loader-logo {
-  width: min(74vw, 540px);
+  width: 74vw; max-width: 540px;
   clip-path: inset(-12% 100% -12% 0);
   animation: l-wipe 1s var(--ease-out) 0.15s forwards;
 }
@@ -141,6 +150,7 @@ body.is-loaded .loader { transform: translateY(-100%); visibility: hidden; }
 /* ════════ HERO ════════ */
 .hero {
   position: relative;
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex; flex-direction: column;
   padding-bottom: 110px;
@@ -148,11 +158,11 @@ body.is-loaded .loader { transform: translateY(-100%); visibility: hidden; }
 }
 .masthead { position: relative; z-index: 2; border-bottom: 2px solid var(--accent); }
 .masthead svg { display: block; width: 100%; height: auto; }
-.hero-inner { margin-block: auto; padding-top: clamp(44px, 7vh, 90px); }
+.hero-inner { margin: auto 0; padding-top: 56px; padding-top: clamp(44px, 7vh, 90px); }
 @media (max-height: 640px) { .scroll-cue { display: none; } .hero { padding-bottom: 40px; } }
-.hero-bg { position: absolute; inset: 0; pointer-events: none; }
+.hero-bg { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; }
 .hero-grid {
-  position: absolute; inset: -10%;
+  position: absolute; top: -10%; right: -10%; bottom: -10%; left: -10%;
   background-image:
     linear-gradient(var(--border) 1px, transparent 1px),
     linear-gradient(90deg, var(--border) 1px, transparent 1px);
@@ -166,6 +176,7 @@ body.is-loaded .loader { transform: translateY(-100%); visibility: hidden; }
 .orb-b { width: 36vw; height: 36vw; max-width: 500px; max-height: 500px; left: -14%; bottom: -18%; background: radial-gradient(circle, rgba(180,177,177,0.10), transparent 65%); }
 .ring {
   position: absolute; right: -6%; top: 50%;
+  width: 480px; height: 480px; margin-top: -240px;
   width: clamp(340px, 42vw, 620px); height: clamp(340px, 42vw, 620px);
   margin-top: calc(clamp(340px, 42vw, 620px) / -2);
   border: 1px solid var(--accent-line);
@@ -201,6 +212,7 @@ body.is-loaded .loader { transform: translateY(-100%); visibility: hidden; }
 .kicker::before { content: ''; width: 34px; height: 1px; background: var(--gris-line); }
 .hero h1 {
   font-family: var(--display);
+  font-size: 52px;
   font-size: clamp(42px, 7.4vw, 88px);
   font-weight: 700;
   line-height: 1.02;
@@ -214,6 +226,7 @@ body.is-loaded .hero h1 .row > span { transform: translateY(0); }
 .hero h1 .row:nth-child(2) > span { transition-delay: 0.09s; }
 .hero h1 em { font-style: italic; color: var(--accent); font-weight: 600; }
 .hero-sub {
+  font-size: 17px;
   font-size: clamp(16px, 1.6vw, 18px);
   color: var(--text-mid);
   line-height: 1.7;
@@ -234,7 +247,7 @@ body.is-loaded .hero-stats { opacity: 1; transform: none; }
 .stat { flex: 1 1 180px; padding: 26px 28px 30px 0; }
 .stat + .stat { border-left: 1px solid var(--border); padding-left: 28px; }
 .stat-num {
-  font-family: var(--display); font-size: clamp(32px, 3.6vw, 46px); font-weight: 700;
+  font-family: var(--display); font-size: 38px; font-size: clamp(32px, 3.6vw, 46px); font-weight: 700;
   color: var(--text); letter-spacing: -0.02em; line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -277,7 +290,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 .toc-num { font-family: var(--mono); font-size: 12px; color: var(--text-soft); transition: color 0.3s ease; }
 .toc-item a:hover .toc-num { color: var(--accent-hi); }
 .toc-name {
-  font-family: var(--display); font-size: clamp(21px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em;
+  font-family: var(--display); font-size: 24px; font-size: clamp(21px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.01em;
   transition: transform 0.35s var(--ease-out);
 }
 .toc-item a:hover .toc-name { transform: translateX(10px); }
@@ -293,6 +306,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 .ghost-wrap { position: absolute; right: 0; top: clamp(20px, 4vh, 50px); pointer-events: none; overflow: visible; will-change: transform; }
 .ghost {
   font-family: var(--display); font-weight: 800;
+  font-size: 200px;
   font-size: clamp(150px, 22vw, 320px); line-height: 0.8;
   color: transparent;
   -webkit-text-stroke: 1px rgba(255, 55, 0, 0.14);
@@ -309,6 +323,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 .platform-title-group { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
 .platform-name {
   font-family: var(--display);
+  font-size: 40px;
   font-size: clamp(34px, 4.6vw, 54px);
   font-weight: 700; letter-spacing: -0.02em; line-height: 1;
 }
@@ -333,6 +348,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 .platform-link:hover svg { transform: translate(2px, -2px); }
 
 .platform-overview {
+  font-size: 17px;
   font-size: clamp(16px, 1.5vw, 18px);
   color: var(--text-mid); line-height: 1.7;
   max-width: 66ch;
@@ -414,6 +430,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 .footer-inner { position: relative; z-index: 2; }
 .footer h2 {
   font-family: var(--display);
+  font-size: 52px;
   font-size: clamp(40px, 6.4vw, 76px);
   font-weight: 700; letter-spacing: -0.025em; line-height: 1.04;
   max-width: 700px;
@@ -855,6 +872,7 @@ body.is-loaded .scroll-cue { opacity: 1; }
 <script>
 (function () {
   'use strict';
+  try {
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ── Loader → is-loaded ── */
@@ -904,16 +922,18 @@ body.is-loaded .scroll-cue { opacity: 1; }
   /* ── Nav: fondo al scrollear + link activo ── */
   var nav = document.getElementById('nav');
   var navLinks = document.querySelectorAll('.nav-links a[data-sec]');
-  var secIO = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (en.isIntersecting) {
-        navLinks.forEach(function (a) {
-          a.classList.toggle('active', a.dataset.sec === en.target.id);
-        });
-      }
-    });
-  }, { rootMargin: '-35% 0px -55% 0px' });
-  document.querySelectorAll('.platform[id]').forEach(function (s) { secIO.observe(s); });
+  if ('IntersectionObserver' in window) {
+    var secIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          navLinks.forEach(function (a) {
+            a.classList.toggle('active', a.dataset.sec === en.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    document.querySelectorAll('.platform[id]').forEach(function (s) { secIO.observe(s); });
+  }
 
   /* ── rAF loop: progress bar + parallax scroll + parallax mouse ── */
   var bar = document.getElementById('progressBar');
@@ -963,6 +983,14 @@ body.is-loaded .scroll-cue { opacity: 1; }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+  } catch (err) {
+    /* failsafe universal: si algo truena, mostrar todo el contenido */
+    if (document.body) {
+      document.body.className += ' is-loaded';
+      var all = document.querySelectorAll('.reveal');
+      for (var q = 0; q < all.length; q++) { all[q].className += ' in'; }
+    }
+  }
 })();
 </script>
 
